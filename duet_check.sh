@@ -11,7 +11,9 @@
 set -u
 AT=${1:-18}; UNTIL=${2:-30}; OUT=${3:-/tmp/duet.wav}
 DIR=$(cd "$(dirname "$0")" && pwd)
-LEN=$(python3 -c "print(int(${UNTIL}-${AT}+4))")
+# ★ 录音必须多留 10s：hybrid_show 启动要先连板子（开串口会复位板子 → 等开机横幅 → 握手），
+#   实测要 4~5s，这期间演出还没开始。原来按 (until-at+4) 取长度 → 尾部被截断（踩过）。
+LEN=$(python3 -c "print(int(${UNTIL}-${AT}+10))")
 
 # 采集固定档位（与声学验收链路一致；Boost 会把自噪声抬进目标频带，别开）
 amixer -c 0 sset Capture 49% >/dev/null 2>&1
