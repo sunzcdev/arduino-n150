@@ -307,9 +307,13 @@ void nextSong() {
 void autoStop() {                       // 收到任何电脑端命令 → 自动演奏让位
   if (mode == M_AUTO) {
     mode = M_PC;
+    noTone(BUZ); autoNote = false;      // v10.4 修：只在"真正让位"那一刻掐音。
     Serial.println(F("[auto] 已让位给电脑端（发 g 恢复自动演奏）"));
   }
-  noTone(BUZ); autoNote = false;
+  // v10.4 修（吞音 bug）：这里原来是无条件 noTone(BUZ)。主机每个音符都发一对命令
+  //   p<Hz>,<ms>（起音）+ f<r>,<g>,<b>（灯脉冲），f 也走 autoStop()，
+  //   于是刚起的 245ms 音符被 1ms 内掐掉 → 整场只剩听不见的咔哒（音箱交接正常，所以像"没音了"）。
+  //   移到 if 内后：电脑端模式下不再互相踩；全停靠 '0' 自己的 stopNote()。
 }
 
 void autoTick() {

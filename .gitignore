@@ -1,0 +1,20 @@
+# 编译产物（不该进版本库）
+__pycache__/
+*.pyc
+*.pyo
+
+# 音频产物（体积大 + 本地录制结果，随时可重跑生成）
+*.wav
+*.flac
+*.mp3
+
+# 本机运维脚本：与 arduino-n150 项目无关（Syncthing 集群维护用），避免误提交
+st_*.py
+add_xingzhe.py
+add_folder_xingzhe.py
+fix_oracle_st.py
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store

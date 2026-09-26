@@ -31,6 +31,8 @@ KEEPALIVE = float(os.environ.get('KEEPALIVE', '0.15'))   # 蜂鸣器段的"伴�
                                                           # （实测 30s 内功放不会因内容静音而睡，故它不是防待机的主力；
                                                           #   防"空隙"靠的是流不断 + 渐强落在交接时刻，见下方 ffplay 处注释）
 FADE = float(os.environ.get('FADE', '2.5'))              # 交接渐变(s)：伴奏→主奏渐强 / 主奏→伴奏渐弱；0=硬切
+AUDIO_LEAD = float(os.environ.get('AUDIO_LEAD', '0.8'))  # 音频起动补偿(s)：ffplay seek + 蓝牙流建立实测约 1s，
+                                                         # 不补偿的话整条时间轴（音符/包络）会比音频早约 1s。
 
 # ---- 表秒 -> 曲秒 的分段线性锚点（(曲秒, 表秒)）----
 # 来源：LRC 权威值 + 表内副歌模板自匹配（idx194/470/638），第三遍副歌交叉验证误差 0.1s
@@ -41,7 +43,9 @@ SLOPE = (144.82 - 57.55) / (153.87 - 58.92)      # 0.9193，末段按此斜率�
 #   谁: 'buz'=蜂鸣器独奏  'spk'=音箱（原曲人声）
 #   模式: 'end' = 表内内容按原速播放、对齐段尾；'fit' = 拉伸/压缩填满整段
 SEGS = [
-    (0.00,   22.95, 'buz', 'end'),    # 前奏
+    (0.00,   22.95, 'buz', 'fit'),    # 前奏（★ 2026-09-26 自审改：原 'end' 按原速对齐段尾，但音符表前奏窗口
+                                      #   比段长 2.41s → 旋律整体提前最多 2.41s、开头 2.41s 的音还被 --at 过滤掉。
+                                      #   改 'fit' 后与两个间奏一致：两端对齐、全程零漂移）
     (22.95, 100.31, 'spk', None),     # 人声1
     (100.31, 118.06, 'buz', 'fit'),   # 间奏1 (17.8s)
     (118.06, 193.01, 'spk', None),    # 人声2
@@ -252,6 +256,9 @@ def main():
         sh('wpctl set-volume %s %s' % (SINK, 1.0 if speaking else KEEPALIVE))
         ff = subprocess.Popen(['ffplay', '-nodisp', '-autoexit', '-loglevel', 'error',
                                '-ss', '%.3f' % args.at, args.flac])
+        # ★ 等音频真正出声再定义时间轴零点（2026-09-26 实测：seek+流建立约 1s，
+        #   不补偿则整条时间轴比音频早约 1s，蜂鸣器听上去会比原曲抢先）。
+        time.sleep(AUDIO_LEAD)
     if args.record:
         rec = subprocess.Popen(['arecord', '-q', '-f', 'S16_LE', '-r', '22050', '-c', '1',
                                 '-d', '%d' % int(until - args.at + 3), args.record])
