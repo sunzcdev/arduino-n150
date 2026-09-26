@@ -20,6 +20,9 @@ amixer -c 0 sset Capture 49% >/dev/null 2>&1
 amixer -c 0 sset "Rear Mic Boost" 0 >/dev/null 2>&1
 
 rm -f "$OUT"
+# ★ 必须记下录音起点墙钟（2026-09-26 教训）：分析锚点 = hybrid_show 打印的 t0_wall − 这一行，
+#   别再靠 show_start/时长推算 —— 我已经因为推算锚点判读错两次。
+echo "rec_start=$(date +%s.%N)"
 arecord -D plughw:0,0 -f S16_LE -r 48000 -c 1 -d "$LEN" "$OUT" 2>/tmp/duet_arec.err &
 REC=$!
 sleep 2
@@ -30,4 +33,5 @@ python3 "$DIR/hybrid_show.py" --at "$AT" --until "$UNTIL" 2>&1 \
 echo "show_end=$(date +%s.%N)"
 wait $REC
 echo "rec=$(stat -c %s "$OUT")B"
-echo "★ 录音时间轴: 前 2s 本底 / $((AT+2))s..$((UNTIL+2))s 演出 / 之后收尾"
+END=$(python3 -c "print(int(${UNTIL}+2))")
+echo "★ 录音时间轴: 前 2s 本底 / $((AT+2))s..${END}s 演出（AT/UNTIL 为曲秒，非录音秒）"

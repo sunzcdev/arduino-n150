@@ -24,7 +24,9 @@ SKILL = os.path.expanduser('~/.hermes/skills/hardware/sound-light-show-productio
 # 本轮及此前沉淀的工具脚本（双份存放者）
 SHARED = ['gen_tone.py', 'tone_scan.py', 'env_scan.py', 'keepalive_ab.sh',
           'duet_check.sh', 'handover_test.sh', 'vol_env.py', 'chain_analyze.py',
-          'vol_sample.sh', 'assets_audit.py']
+          'vol_sample.sh', 'assets_audit.py',
+          # 演出前自审 + 设备自检 + 整曲报告（2026-09-26 整曲验收前补齐）
+          'show_audit.py', 'board_selftest.py', 'preflight_check.sh', 'full_run_report.py']
 
 # "文档承诺必须真在代码里"——关键判据（子串必须命中）
 MARKERS = {

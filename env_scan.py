@@ -90,9 +90,10 @@ def main():
     print('%s  %.2fs  带通(%.0f-%.0fHz) 本底(p05)=%.1fdB 活跃(p95)=%.1fdB 峰值(单点)=%.1fdB'
           % (path.split('/')[-1], dur, lo, hi, floor, loud, max(stat)))
 
-    # 起始：连续 3 窗(0.3s)高于 本底+8dB
+    # 起始：连续 3 窗(0.3s)高于 本底+8dB。★ 必须从 SKIP 之后开始找 —— 起录那声咔哒是宽带的，
+    # 会让"首次出声"误报成 t=0（tone_scan 里已修过同一个坑，这里是同一类）。
     thr = floor + 8.0
-    onset, i = None, 0
+    onset, i = None, next((k for k, (t, _) in enumerate(rows) if t >= SKIP), 0)
     while i < len(rows):
         if rows[i][1] > thr:
             j = i
