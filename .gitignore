@@ -13,6 +13,7 @@ st_*.py
 add_xingzhe.py
 add_folder_xingzhe.py
 fix_oracle_st.py
+stignore_music.txt
 
 # 编辑器 / 系统
 .vscode/
